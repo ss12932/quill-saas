@@ -30,6 +30,7 @@ import {
 
 import Simplebar from "simplebar-react";
 import SimpleBar from "simplebar-react";
+import PdfFullscreen from "@/components/pdf-fullscreen";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
@@ -81,6 +82,7 @@ const PdfRenderer = ({ url }: PdfRendererProps) => {
             aria-label="previous page"
             onClick={() => {
               setCurrPage((prev) => (prev - 1 > 1 ? prev - 1 : 1));
+              setValue("page", String(currPage - 1));
             }}
           >
             <ChevronDown className="h-4 w-4" />
@@ -110,6 +112,7 @@ const PdfRenderer = ({ url }: PdfRendererProps) => {
               setCurrPage((prev) =>
                 prev + 1 > numPages! ? numPages! : prev + 1,
               );
+              setValue("page", String(currPage + 1));
             }}
             variant="ghost"
             aria-label="next page"
@@ -163,6 +166,7 @@ const PdfRenderer = ({ url }: PdfRendererProps) => {
           >
             <RotateCw className="w-4 h-4" />
           </Button>
+          <PdfFullscreen fileUrl={url} />
         </div>
       </div>
       <div className="flex-1 w-full max-h-screen">
