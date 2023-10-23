@@ -1,15 +1,16 @@
 import { ReactNode, createContext, useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { useMutation } from "@tanstack/react-query";
+import { af } from "date-fns/locale";
 
-type SteamResponse = {
+type StreamResponse = {
   addMessage: () => void;
   message: string;
   handleInputChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
   isLoading: boolean;
 };
 
-export const ChatContext = createContext({
+export const ChatContext = createContext<StreamResponse>({
   addMessage: () => {},
   message: "",
   handleInputChange: () => {},
@@ -23,11 +24,12 @@ interface Props {
 
 export const ChatContextProvider = ({ fileId, children }: Props) => {
   const [message, setMessage] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const { toast } = useToast();
 
   // not tRPC, use regular react-query for this to stream back response from API to clientside. tRPC only works for JSON.
-  const {} = useMutation({
-    mutationFn: async () => {
+  const { mutate: sendMessage } = useMutation({
+    mutationFn: async ({ message }: { message: string }) => {
       const response = await fetch(`/api/message/${fileId}`, {
         method: "POST",
         body: JSON.stringify({
@@ -41,4 +43,18 @@ export const ChatContextProvider = ({ fileId, children }: Props) => {
       return response.body;
     },
   });
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setMessage(e.target.value);
+  };
+
+  const addMessage = () => sendMessage({ message });
+
+  return (
+    <ChatContext.Provider
+      value={{ addMessage, message, handleInputChange, isLoading }}
+    >
+      {children}
+    </ChatContext.Provider>
+  );
 };
